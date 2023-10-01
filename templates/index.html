@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Query Tool</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Review Query Tool</h1>
+        <form id="reviewForm" method="POST">
+            <label for="placeId">Place ID:</label>
+            <input type="text" id="placeId" name="place_id" placeholder="Enter Place ID...">
+            <br>
+
+            <label for="limit">Limit (Max 10):</label>
+            <input type="number" id="limit" name="limit" min="1" max="10" value="10">
+            <br>
+
+            <button id="run" type="submit">Run</button>
+        </form>
+
+        <div id="output" style="margin-top: 2em; border: 1px solid #ccc; padding: 1em;">
+            <!-- Reviews will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code for handling form submission and displaying results
+        document.getElementById("reviewForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            // Get form data
+            const placeId = document.getElementById("placeId").value;
+            const limit = document.getElementById("limit").value;
+
+            // Send a POST request to the server
+            fetch("/", {
+                method: "POST",
+                body: new URLSearchParams({
+                    "place_id": placeId,
+                    "limit": limit
+                }),
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the JSON response and display reviews
+                const outputDiv = document.getElementById("output");
+                outputDiv.innerHTML = ""; // Clear previous results
+
+                if (data.error) {
+                    // Handle and display error message
+                    outputDiv.textContent = "Error: " + data.error;
+                } else {
+                    // Display reviews
+                    data.forEach(review => {
+                        const reviewDiv = document.createElement("div");
+                        reviewDiv.classList.add("review");
+                        reviewDiv.innerHTML = `
+                            <p><strong>Author:</strong> ${review.review_author}</p>
+                            <p><strong>Rating:</strong> ${review.review_rating}</p>
+                            <p><strong>Review:</strong> ${review.review_text}</p>
+                        `;
+                        outputDiv.appendChild(reviewDiv);
+                    });
+                }
+            })
+            .catch(error => {
+                // Handle and display fetch error
+                const outputDiv = document.getElementById("output");
+                outputDiv.textContent = "Fetch Error: " + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
