@@ -16,59 +16,80 @@
             <label for="limit">Limit (Max 10):</label>
             <input type="number" id="limit" name="limit" min="1" max="10" value="2">
             <br>
+            
+            <label for="filter">Filter:</label>
+            <input type="text" id="filter" name="filter" placeholder="Enter Keywords to filter by">
+            <br>
 
             <button id="run" type="submit">Run</button>
         </form>
-
+        <div id="venue_name" style="margin-top: 2em; border: 1px solid #ccc; padding: 1em;">
+            <!-- Venue info will be populated here -->
+        </div>
         <div id="output" style="margin-top: 2em; border: 1px solid #ccc; padding: 1em;">
             <!-- Reviews will be populated here -->
         </div>
     </div>
 
     <script>
+        // JavaScript code for handling form submission and displaying results
         document.getElementById("reviewForm").addEventListener("submit", function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent the form from submitting normally
 
+            // Get form data
             const placeId = document.getElementById("placeId").value;
             const limit = document.getElementById("limit").value;
 
+            // Send a POST request to the server
             fetch("/", {
                 method: "POST",
                 body: new URLSearchParams({
                     "place_id": placeId,
-                    "limit": limit
-                }),
+                    "limit": limit,
+                    "filter": document.getElementById("filter").value}),
+            
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
             })
             .then(response => response.json())
             .then(data => {
-                const outputDiv = document.getElementById("output");
-                outputDiv.innerHTML = "";
+        const venueDiv = document.getElementById("venue_name");
+        const outputDiv = document.getElementById("output");
 
-                if (data.error) {
-                    outputDiv.textContent = "Error: " + data.error;
-                } else if (data.message) {
-                    outputDiv.textContent = data.message;
-                } else {
-                    data.forEach(review => {
-                        const reviewDiv = document.createElement("div");
-                        reviewDiv.classList.add("review");
-                        reviewDiv.innerHTML = `
-                            <p><strong>Author:</strong> ${review.review_author}</p>
-                            <p><strong>Rating:</strong> ${review.review_rating}</p>
-                            <p><strong>Review:</strong> ${review.review_text}</p>
-                        `;
-                        outputDiv.appendChild(reviewDiv);
-                    });
-                }
-            })
-            .catch(error => {
-                const outputDiv = document.getElementById("output");
-                outputDiv.textContent = "Fetch Error: " + error.message;
-            });
-        });
+        // Clear previous results
+        venueDiv.innerHTML = "";
+        outputDiv.innerHTML = "";
+
+        if (data.error) {
+            // Handle and display error message
+            outputDiv.textContent = "Error: " + data.error;
+        } else {
+            // Display venue name
+            venueDiv.innerHTML = `<strong>Venue:</strong> ${data.name}`;
+
+            // Display reviews
+            if(data.reviews && data.reviews.length) {
+                data.reviews.forEach(review => {
+                    const reviewDiv = document.createElement("div");
+                    reviewDiv.classList.add("review");
+                    reviewDiv.innerHTML = `
+                        <p><strong>Author:</strong> ${review.author_title}</p>
+                        <p><strong>Rating:</strong> ${review.review_rating}</p>
+                        <p><strong>Review:</strong> ${review.review_text}</p>
+                    `;
+                    outputDiv.appendChild(reviewDiv);
+                });
+            } else {
+                outputDiv.textContent = "No reviews available.";
+            }
+        }
+    })
+    .catch(error => {
+        const outputDiv = document.getElementById("output");
+        outputDiv.textContent = "Fetch Error: " + error.message;
+    });
+});
     </script>
 </body>
 </html>

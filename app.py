@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, render_template
 from outscraper import ApiClient
+from bs4 import BeautifulSoup
+import os
 
 # Replace 'YOUR_API_KEY' with your actual API key
-API_KEY = 'Z29vZ2xlLW9hdXRoMnwxMTYwNjM3MDIzMjEyMTM2NTc0ODR8MDllZTg5YjRlMQ'
+API_KEY = os.environ.get("API_KEY")
 
 app = Flask(__name__, template_folder='templates')
 
@@ -14,35 +16,22 @@ def index():
 def get_reviews():
     # Get input data from the POST request
     place_id = request.form.get('place_id')
-    
-    # Default the review limit to 2 if no limit is provided
-    limit = request.form.get('limit', 2)
-    limit = int(limit)
+    limit = request.form.get('limit')
+    filter = request.form.get('filter')
 
     try:
         # Initialize the Outscraper API client
         api_client = ApiClient(api_key=API_KEY)
 
         # Use the library to fetch Google Maps reviews
-        results = api_client.google_maps_reviews(place_id, reviews_limit=limit)
-
-        if not results:
-            return jsonify({'message': 'Query successful, no matching reviews found.'})
-
-        # Transform the reviews to match your desired structure
-        parsed_data = []
-        for review in results:
-            review_data = {
-                'review_author': review.get('review_author', '').strip(),
-                'review_rating': int(review.get('review_rating', 0)),
-                'review_text': review.get('review_text', '').strip()
-            }
-
-            parsed_data.append(review_data)
+        results = api_client.google_maps_reviews(place_id, reviews_limit=int(limit), reviews_query= filter)
+        print(results)
+        review_data = results[0]['reviews_data']
+        venue_name = results[0]['name']
 
         # Return the parsed data as JSON
-        return jsonify(parsed_data)
-
+        return jsonify({"name": venue_name, "reviews": review_data})
+    
     except Exception as e:
         # Handle API request errors here
         error_message = str(e)
