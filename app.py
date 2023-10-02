@@ -28,9 +28,15 @@ def get_reviews():
         print(results)
         review_data = results[0]['reviews_data']
         venue_name = results[0]['name']
+        reviews_rating = results[0]['rating']
+        review_data = results[0]['reviews_data']
+
+        total_rating = sum([review['review_rating'] for review in review_data])
+        avg_rating = total_rating / len(review_data) if review_data else 0
 
         # Return the parsed data as JSON
-        return jsonify({"name": venue_name, "reviews": review_data})
+        return jsonify({"rating": reviews_rating, "avg_rating": avg_rating, "name": venue_name, "reviews": review_data})
+
     
     except Exception as e:
         # Handle API request errors here

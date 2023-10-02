@@ -14,7 +14,7 @@
             <br>
 
             <label for="limit">Limit (Max 10):</label>
-            <input type="number" id="limit" name="limit" min="1" max="10" value="2">
+            <input type="number" id="limit" name="limit" min="1" max="30" value="4">
             <br>
             
             <label for="filter">Filter:</label>
@@ -24,7 +24,13 @@
             <button id="run" type="submit">Run</button>
         </form>
         <div id="venue_name" style="margin-top: 2em; border: 1px solid #ccc; padding: 1em;">
-            <!-- Venue info will be populated here -->
+            <!-- Venue name will be populated here -->
+        </div>
+        <div id="rating" style="margin-top: 2em; border: 1px solid #ccc; padding: 1em;">
+            <!-- Rating will be populated here -->
+        </div>
+        <div id="avg_rating" style="margin-top: 2em; border: 1px solid #ccc; padding: 1em;">
+                <!-- Average rating will be populated here -->
         </div>
         <div id="output" style="margin-top: 2em; border: 1px solid #ccc; padding: 1em;">
             <!-- Reviews will be populated here -->
@@ -54,11 +60,14 @@
             })
             .then(response => response.json())
             .then(data => {
-        const venueDiv = document.getElementById("venue_name");
-        const outputDiv = document.getElementById("output");
+            const venueDiv = document.getElementById("venue_name");
+            const ratingDiv = document.getElementById("rating");
+            const outputDiv = document.getElementById("output");
+            const avgRatingDiv = document.getElementById("avg_rating");
 
         // Clear previous results
-        venueDiv.innerHTML = "";
+        venueDiv.innerHTML = `<strong>Venue:</strong> ${data.name}`;
+        ratingDiv.innerHTML = `<strong>Rating:</strong> ${data.rating}`;
         outputDiv.innerHTML = "";
 
         if (data.error) {
@@ -67,7 +76,8 @@
         } else {
             // Display venue name
             venueDiv.innerHTML = `<strong>Venue:</strong> ${data.name}`;
-
+            ratingDiv.innerHTML = `<strong>Rating:</strong> ${data.rating}`;
+            avgRatingDiv.innerHTML = `<strong>Filtered Review Rating:</strong> ${data.avg_rating.toFixed(2)}`;
             // Display reviews
             if(data.reviews && data.reviews.length) {
                 data.reviews.forEach(review => {
