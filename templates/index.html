@@ -16,7 +16,12 @@
             <label for="limit">Limit (Max 10):</label>
             <input type="number" id="limit" name="limit" min="1" max="30" value="4">
             <br>
-            
+            <label for="filterType">Filter Type:</label>
+                <select id="filterType" name="filter_type">
+                <option value="and">And</option>
+                <option value="or">Or</option>
+                </select>
+            <br>
             <label for="filter">Filter:</label>
             <input type="text" id="filter" name="filter" placeholder="Enter Keywords to filter by">
             <br>
@@ -45,6 +50,7 @@
             // Get form data
             const placeId = document.getElementById("placeId").value;
             const limit = document.getElementById("limit").value;
+            const filterType = document.getElementById("filterType").value;  // Get the filter type
 
             // Send a POST request to the server
             fetch("/", {
@@ -52,8 +58,9 @@
                 body: new URLSearchParams({
                     "place_id": placeId,
                     "limit": limit,
-                    "filter": document.getElementById("filter").value}),
-            
+                    "filter": document.getElementById("filter").value,
+                    "filter_type": filterType  // Send the filter type
+                }),
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
